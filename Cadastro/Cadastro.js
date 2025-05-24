@@ -7,7 +7,7 @@ const cepRegex = /^\d{5}-\d{3}$/; // Valida formato de CEP (00000-000)
 const enderecoRegex = /^[a-zA-Z\u00C0-\u00FF ]+, [a-zA-Z\u00C0-\u00FF ]+, \d+$/; // Valida formato de endereço (Rua, Bairro, N°)
 
 // Adiciona listener para o evento de submit do formulário
-formularioRegistro.addEventListener("submit", (e) => {
+formularioRegistro.addEventListener("submit", async (e) => {
     e.preventDefault(); // Previne o comportamento padrão de submit
     
     // Obtém os valores dos campos do formulário
@@ -19,6 +19,14 @@ formularioRegistro.addEventListener("submit", (e) => {
     const cidade = document.getElementById('cidade').value;
     const estado = document.getElementById('estado').value;
     const senha = document.getElementById('senha').value;
+
+    const dados = {
+        nome,
+        email,
+        senha,
+        CEP:cep
+    };
+
 
     // Validação do e-mail
     if (!emailRegex.test(email)) {
@@ -44,27 +52,49 @@ formularioRegistro.addEventListener("submit", (e) => {
         return;
     }
 
-    // Envio dos dados para o servidor via Fetch API
-    fetch('http://localhost:8080/registro', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json' // Define o tipo de conteúdo como JSON
-        },
-        body: JSON.stringify({ // Converte os dados para JSON
-            nome,
-            email,
-            idade,
-            cep,
-            endereco,
-            cidade,
-            estado,
-            senha
-        })
-    })
-    .then(response => response.text()) // Converte a resposta para texto
-    .then(data => alert(data)) // Mostra a resposta do servidor
-    .catch(error => console.error('Erro:', error)); // Captura erros de rede
+  try {
+    const resposta = await fetch('https://dc-descarte-certo-backend.onrender.com/api/usuarios', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados) // ou os campos que estiverem no formulário
+    });
+
+    const resultado = await resposta.json();
+
+    if (resposta.ok) {
+        alert('Cadastro realizado com sucesso!');
+        window.location.href = '/Login/Login.html';
+    } else {
+        console.error('Erro do servidor:', resultado);
+        alert('Erro ao cadastrar: ' + (resultado.erro || resultado.message || 'Erro desconhecido'));
+    }
+
+    } catch (erro) {
+    alert('Erro ao conectar com o servidor: ' + erro.message);
+}
 });
+
+    // Envio dos dados para o servidor local via Fetch API
+//     fetch('http://localhost:8080/registro', {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json' // Define o tipo de conteúdo como JSON
+//         },
+//         body: JSON.stringify({ // Converte os dados para JSON
+//             nome,
+//             email,
+//             idade,
+//             cep,
+//             endereco,
+//             cidade,
+//             estado,
+//             senha
+//         })
+//     })
+//     .then(response => response.text()) // Converte a resposta para texto
+//     .then(data => alert(data)) // Mostra a resposta do servidor
+//     .catch(error => console.error('Erro:', error)); // Captura erros de rede
+// });
 
 // Validação em tempo real para campos do formulário
 document.querySelectorAll('#cadastroForm input').forEach(input => {

@@ -41,8 +41,15 @@ header {
   padding: 0;
 }
 
+.user-name {
+  margin-right: 10px;
+  font-weight: bold;
+  color: black;
+}
+
 .nav-bar li {
   display: flex;
+  padding: 3px;
   align-items: center;
 }
 
